@@ -1,3 +1,4 @@
+const fs = require('fs');
 let Character = require('./character.js'); 
 const admin = require('firebase-admin');
 let serviceAccount = require("./world-of-warcraft-51327-firebase-adminsdk-18c0w-31ebb1fafd.json");
@@ -10,6 +11,16 @@ admin.initializeApp({
 let db = admin.firestore();
 
 
+var newCharactersFile = JSON.parse(fs.readFileSync("./charactersToAdd.json"));
+var newCharacters = newCharactersFile.newCharacters;
+console.log(newCharacters);
+//fs.writeFileSync("./charactersToAdd.json", JSON.stringify({"newCharacters": []}, null, 2));
+
+
+
+
+
+/*
 var tankadinn = new Character("Tankadinn", "Darkspear", 120, 30, 2);
 
 let docRef = db.collection('/Classic').doc(tankadinn.getName());
@@ -23,7 +34,7 @@ docRef.set(
   }
 
 ).then(function () {return Promise.resolve()});
-
+*/
 /*
 
 let docRef = db.collection('/Classic').doc('alovelace');
