@@ -13,7 +13,7 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 //import for my own Blizzard API
 //var Blizzard = require('./blizzardAPI.js');
-//Referance to our Blizzard API to request from Blizzard
+//Reference to our Blizzard API to request from Blizzard
 //var armory = new Blizzard(blizzardAuth.ID, blizzardAuth.Secret);
 
 

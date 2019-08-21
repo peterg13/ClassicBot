@@ -2,12 +2,19 @@ const fs = require('fs');
 let Character = require('./character.js'); 
 const admin = require('firebase-admin');
 let serviceAccount = require("./world-of-warcraft-51327-firebase-adminsdk-18c0w-31ebb1fafd.json");
+//the file that contains the bots Blizzard ID and Secret
+var blizzardAuth = require("./blizzardAuth.json");
+//import for my own Blizzard API
+var Blizzard = require('./blizzardAPI.js');
+//Reference to our Blizzard API to request from Blizzard
+var armory = new Blizzard(blizzardAuth.ID, blizzardAuth.Secret);
 
+//initilizes out connection with Firebase
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://world-of-warcraft-51327.firebaseio.com"
 });
-
+//reference to out Firebase Database
 let db = admin.firestore();
 
 
@@ -18,10 +25,13 @@ newCharacters.forEach(function(element){
   var tempCharacter = new Character(element.name, element.realm, 0, 0, 0);
   newCharacterArray.push(tempCharacter);
 });
-console.log(newCharacterArray);
+//console.log(newCharacterArray);
 //fs.writeFileSync("./charactersToAdd.json", JSON.stringify({"newCharacters": []}, null, 2));
-
-
+var tankadinn = new Character("Tankadinn", "Darkspear", 120, 30, 2);
+//console.log("server: " + armory.requestCharacter(tankadinn));
+armory.requestCharacter(tankadinn, response => {
+  console.log(response);
+});
 
 
 
