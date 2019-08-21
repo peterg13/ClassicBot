@@ -13,7 +13,12 @@ let db = admin.firestore();
 
 var newCharactersFile = JSON.parse(fs.readFileSync("./charactersToAdd.json"));
 var newCharacters = newCharactersFile.newCharacters;
-console.log(newCharacters);
+var newCharacterArray = [];
+newCharacters.forEach(function(element){
+  var tempCharacter = new Character(element.name, element.realm, 0, 0, 0);
+  newCharacterArray.push(tempCharacter);
+});
+console.log(newCharacterArray);
 //fs.writeFileSync("./charactersToAdd.json", JSON.stringify({"newCharacters": []}, null, 2));
 
 
@@ -36,16 +41,6 @@ docRef.set(
 ).then(function () {return Promise.resolve()});
 */
 /*
-
-let docRef = db.collection('/Classic').doc('alovelace');
-
-let setAda = docRef.set(
-    {
-  first: 'Ada',
-  last: 'Lovelace',
-  born: 1815
-}
-).then(function () {return Promise.resolve()});
 
 db.collection("Classic").get()
   .then((snapshot) => {

@@ -26,25 +26,32 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
     //announces on Discord that the bot is online
     client.channels.get('415954951630618633').send('Classic Bot Online!');
-    addCharacter("Profesional", "Darkspear");
 });
 
   //what happens when a message is received
 client.on('message', message => {
-    /*var splitMessage = message.content.split(" ");
+    var splitMessage = message.content.split(" ");
     if (splitMessage[0] === "add"){
-      console.log("adding character: " + splitMessage[1] + " - " + splitMessage[2]);
       addCharacter(splitMessage[1], splitMessage[2]);
-    }*/
+    }
   });
 
 function addCharacter(characterName, characterRealm){
   var jsonCharactersToAdd = JSON.parse(fs.readFileSync("./charactersToAdd.json"));
-  console.log(jsonCharactersToAdd);
   jsonCharactersToAdd["newCharacters"].push({"name": characterName, "realm": characterRealm});
-  console.log(jsonCharactersToAdd);
+  //prints a message to the console
+  addCharacterConsoleMessage(jsonCharactersToAdd);
   fs.writeFileSync("./charactersToAdd.json", JSON.stringify(jsonCharactersToAdd, null, 2)); 
 };
+
+//simply print to the console to keep up with what is being added
+function addCharacterConsoleMessage(newJSON){
+  console.log("\n----------------------------------------------------");
+  console.log("----     New characters waiting to be added     ----");
+  console.log("----------------------------------------------------");
+  console.log(newJSON);
+  console.log("----------------------------------------------------\n");
+}
 
 //logs the client in
 client.login(discordAuth.token);
