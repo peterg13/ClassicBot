@@ -1,6 +1,7 @@
 const Promise = require("bluebird");
 //used to make a request from Blizzards API
 const request = require('request');
+let Character = require('./character.js');
 
 class Blizzard {
     
@@ -43,19 +44,24 @@ class Blizzard {
         return this.getMyToken().then(this.oauth2.accessToken);
     };
 
-    callAPICharacter(callback){
-        request('https://us.api.blizzard.com/wow/character/Darkspear/Tankadinn?locale=en_US&access_token=USL5raWFE2cyl28C62h5QQdGDIXkXgE6aq', { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        else{
-        console.log(body)
-        callback(body);}
-        });
+    callAPICharacter(character, callback){
+        this.getToken().then(accessToken => {
+            request('https://us.api.blizzard.com/wow/character/' + character.getRealm() + '/' + character.getName() + '?locale=en_US&access_token=' + accessToken, { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            else{
+            callback(body);}
+            });}); 
+        
     };  
 
-    requestCharacter(){
-        this.callAPICharacter(function(body){
-            return body;
+    requestCharacter(character, callback){
+        this.callAPICharacter(character, body =>{
+            character.setLevel(body.level);
+            character.setRace(body.race);
+            character.setClass(body.class);
+            callback(character);
         })
+        
     }
 };
 

@@ -26,6 +26,23 @@ class Character{
     getClass(){
         return this._class;
     }
+
+    setName(newName){
+        this._name = newName;
+    }
+
+    setRealm(newRealm){
+        this._realm = newRealm;
+    }
+    setLevel(newLevel){
+        this._level = newLevel;
+    }
+    setRace(newRace){
+        this._race = newRace;
+    }
+    setClass(newClass){
+        this._class = newClass;
+    }
 };
 
 module.exports = Character;
