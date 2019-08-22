@@ -33,9 +33,11 @@ getNewCharacters().then(newCharacters => {
   //console.log(newCharacters);
   pullDatabase().then(database =>{
     newCharacters.forEach(newCharacter => {
-      //does not check if already exists
-      database.push(newCharacter);
+      if(!doesCharacterExist(newCharacter, database)){
+        database.push(newCharacter);
+      }
     })
+    //database now contains all the characters new and old
     console.log(database);
   });
 });
@@ -85,6 +87,18 @@ function pullDatabase(){
     }
   }) 
 };
+
+function doesCharacterExist(checkCharacter, characterArray){
+  for(let i = 0; i < characterArray.length; i++){
+    var characterInArray = characterArray[i];
+    if(characterInArray.getName().toLowerCase() === checkCharacter.getName().toLowerCase() && 
+    characterInArray.getRealm().toLowerCase() === checkCharacter.getRealm().toLowerCase()){
+      return true;
+    }
+  }
+  return false;
+}
+
 /*
 var tankadinn = new Character("Tankadinn", "Darkspear", 120, 30, 2);
 
