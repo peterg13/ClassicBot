@@ -54,14 +54,20 @@ class Blizzard {
         
     };  
 
-    requestCharacter(character, callback){
-        this.callAPICharacter(character, body =>{
-            character.setLevel(body.level);
-            character.setRace(body.race);
-            character.setClass(body.class);
-            callback(character);
+    requestCharacter(character){
+
+        return new Promise((resolve, reject) => {
+            try{
+                this.callAPICharacter(character, body => {
+                    character.setLevel(body.level);
+                    character.setRace(body.race);
+                    character.setClass(body.class);
+                    resolve(character);
+                })
+            } catch(e){
+                reject(e);
+            }
         })
-        
     }
 };
 

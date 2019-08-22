@@ -7,6 +7,7 @@ class Character{
         this._class = characterClass;
     }
 
+
     getName(){
         return this._name;
     }
