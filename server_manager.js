@@ -22,9 +22,9 @@ admin.initializeApp({
 let db = admin.firestore();
 
 
-//get new character
-//pull database
-//combine
+//get new character- done
+//pull database - done
+//combine - done
 //call blizzard api for each character
 //check for updates
 //if so then update the database
@@ -32,13 +32,22 @@ let db = admin.firestore();
 getNewCharacters().then(newCharacters => {
   //console.log(newCharacters);
   pullDatabase().then(database =>{
+    var addedCharacters = [];
     newCharacters.forEach(newCharacter => {
       if(!doesCharacterExist(newCharacter, database)){
-        database.push(newCharacter);
+        //adds the character to online database
+        writeCharacterToFirebase(newCharacter);
+        //adds character to our locally copied database for further evaluation
+        addedCharacters.push(newCharacter);
       }
     })
     //database now contains all the characters new and old
-    console.log(database);
+    updateCharacters(database);
+    addedCharacters.forEach(addedCharacter =>{
+      database.push(addedCharacter);
+    });
+    writeDatabaseToFile(database);
+    //console.log(database);
   });
 });
 
@@ -97,6 +106,47 @@ function doesCharacterExist(checkCharacter, characterArray){
     }
   }
   return false;
+};
+
+function updateCharacters(database){
+  
+  var updatedCharactersPromises = database.map(dbCharacter => {
+    return armory.requestCharacter(dbCharacter);
+  });
+  
+  return Promise.all(updatedCharactersPromises).then(updatedCharacters => {
+    for(let i = 0; i < updateCharacters.length; i++){
+      for(let j = 0; j < database.length; j++){
+        //first let's make sure we are comparing the correct characters.  if not, moves on to next character in database and checks again
+        if(updateCharacters[i].getName().toLowerCase() === database[j].getName().toLowerCase() &&
+        updateCharacters[i].getRealm().toLowerCase() === database[j].getRealm().toLowerCase()){
+          //now we have to check if the level is different (no race changes exist in classic)
+          if(updatedCharacters[i].getLevel() != database[j].getLevel()){
+            //overwrites the database entry for that character
+            writeCharacterToFirebase(updateCharacters[i]);
+          }
+        }
+      }
+    }
+  });
+};
+
+function writeCharacterToFirebase(character){
+  let docRef = db.collection('/Classic').doc(character.getName());
+  docRef.set(
+    {
+      name: character.getName(),
+      realm: character.getRealm(),
+      level: character.getLevel(),
+      race: character.getRace(),
+      class: character.getClass()
+    }
+
+  ).then(function () {return Promise.resolve()});
+}
+
+function writeDatabaseToFile(database){
+  fs.writeFileSync("./local_database.json", JSON.stringify(database, null, 2));
 }
 
 /*
