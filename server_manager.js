@@ -156,7 +156,27 @@ function writeCharacterToFirebase(character){
 }
 
 function writeDatabaseToFile(database){
-  fs.writeFileSync("./local_database.json", JSON.stringify({"Characters": database}, null, 2));
+  var lastUpdated = getLastUpdated();
+  fs.writeFileSync("./local_database.json", JSON.stringify({"Characters": database, "LastUpdated": lastUpdated}, null, 2));
+}
+
+function getLastUpdated(){
+  var date = new Date();
+  var todaysDate = (date.getMonth()+1) + "/" + date.getDate() + "/" + date.getFullYear();
+  var currentHour = "";
+  if(date.getHours() > 12 || date.getHours() == 0){
+    currentHour = Math.abs(date.getHours() - 12);
+  }
+  else{
+    curentHour = date.getHours();
+  }
+  if(currentHour < 10){
+    currentHour = "0" + currentHour;
+  }
+  var currentMinute = date.getMinutes() < 10 ? "0"+date.getMinutes() : date.getMinutes();
+  var currentTime = currentHour + ":" + currentMinute + (date.getHours()<12 ? "am" : "pm");
+  var lastUpdated =  "Last Updated: " + todaysDate + " at " + currentTime + " PST";
+  return lastUpdated;
 }
 
 /*
