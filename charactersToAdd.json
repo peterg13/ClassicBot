@@ -1,32 +1,3 @@
 {
-  "newCharacters": [
-    {
-      "name": "Serawr",
-      "realm": "Darkspear"
-    },
-    {
-      "name": "Savageblow",
-      "realm": "Darkspear"
-    },
-    {
-      "name": "Kaol",
-      "realm": "Darkspear"
-    },
-    {
-      "name": "Profesional",
-      "realm": "Darkspear"
-    },
-    {
-      "name": "Voidninja",
-      "realm": "Darkspear"
-    },
-    {
-      "name": "Voidmage",
-      "realm": "Darkspear"
-    },
-    {
-      "name": "Superpooter",
-      "realm": "Darkspear"
-    }
-  ]
+  "newCharacters": []
 }

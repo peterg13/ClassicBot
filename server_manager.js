@@ -41,12 +41,20 @@ getNewCharacters().then(newCharacters => {
         addedCharacters.push(newCharacter);
       }
     })
-    //database now contains all the characters new and old
-    updateCharacters(database);
-    addedCharacters.forEach(addedCharacter =>{
-      database.push(addedCharacter);
+    
+    updateCharacters(database).then(promises => {
+      //database now contains all the characters new and old
+      addedCharacters.forEach(addedCharacter =>{
+        database.push(addedCharacter);
+      });
+      writeDatabaseToFile(database);
+      //console.log(database);
     });
-    writeDatabaseToFile(database);
+    //database now contains all the characters new and old
+    //addedCharacters.forEach(addedCharacter =>{
+      //database.push(addedCharacter);
+    //});
+    //writeDatabaseToFile(database);
     //console.log(database);
   });
 });
@@ -71,7 +79,8 @@ function getNewCharacters(){
   var promiseArray = tempCharacterArray.map(tempCharacter => {
     return armory.requestCharacter(tempCharacter);
   });
-  //fs.writeFileSync("./charactersToAdd.json", JSON.stringify({"newCharacters": []}, null, 2));
+  //clears the file of characters waiting to be added
+  fs.writeFileSync("./charactersToAdd.json", JSON.stringify({"newCharacters": []}, null, 2));
   return Promise.all(promiseArray);
   
 };
@@ -108,22 +117,23 @@ function doesCharacterExist(checkCharacter, characterArray){
   return false;
 };
 
-function updateCharacters(database){
-  
+function updateCharacters(database){ 
   var updatedCharactersPromises = database.map(dbCharacter => {
-    return armory.requestCharacter(dbCharacter);
+    //clone the character so we don't update the database itself
+    var characterCopy = dbCharacter.clone();
+    return armory.requestCharacter(characterCopy);
   });
-  
-  return Promise.all(updatedCharactersPromises).then(updatedCharacters => {
-    for(let i = 0; i < updateCharacters.length; i++){
+
+  return Promise.all(updatedCharactersPromises).then(updatedCharacters => {  
+    for(let i = 0; i < updatedCharacters.length; i++){
       for(let j = 0; j < database.length; j++){
         //first let's make sure we are comparing the correct characters.  if not, moves on to next character in database and checks again
-        if(updateCharacters[i].getName().toLowerCase() === database[j].getName().toLowerCase() &&
-        updateCharacters[i].getRealm().toLowerCase() === database[j].getRealm().toLowerCase()){
+        if(updatedCharacters[i].getName().toLowerCase() === database[j].getName().toLowerCase() &&
+        updatedCharacters[i].getRealm().toLowerCase() === database[j].getRealm().toLowerCase()){
           //now we have to check if the level is different (no race changes exist in classic)
           if(updatedCharacters[i].getLevel() != database[j].getLevel()){
             //overwrites the database entry for that character
-            writeCharacterToFirebase(updateCharacters[i]);
+            writeCharacterToFirebase(updatedCharacters[i]);
           }
         }
       }
@@ -146,7 +156,7 @@ function writeCharacterToFirebase(character){
 }
 
 function writeDatabaseToFile(database){
-  fs.writeFileSync("./local_database.json", JSON.stringify(database, null, 2));
+  fs.writeFileSync("./local_database.json", JSON.stringify({"Characters": database}, null, 2));
 }
 
 /*

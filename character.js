@@ -44,6 +44,9 @@ class Character{
     setClass(newClass){
         this._class = newClass;
     }
+    clone(){
+        return new Character(this._name, this._realm, this._level, this._race, this._class);
+    }
 };
 
 module.exports = Character;
