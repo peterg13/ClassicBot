@@ -30,13 +30,13 @@ let db = admin.firestore();
 //if so then update the database
 //write to file for discord bot
 getNewCharacters().then(newCharacters => {
-  //console.log(newCharacters);
+  console.log(newCharacters);
   pullDatabase().then(database =>{
     var addedCharacters = [];
     newCharacters.forEach(newCharacter => {
       if(!doesCharacterExist(newCharacter, database)){
         //adds the character to online database
-        writeCharacterToFirebase(newCharacter);
+        //writeCharacterToFirebase(newCharacter);
         //adds character to our locally copied database for further evaluation
         addedCharacters.push(newCharacter);
       }
@@ -133,7 +133,7 @@ function updateCharacters(database){
           //now we have to check if the level is different (no race changes exist in classic)
           if(updatedCharacters[i].getLevel() != database[j].getLevel()){
             //overwrites the database entry for that character
-            writeCharacterToFirebase(updatedCharacters[i]);
+            //writeCharacterToFirebase(updatedCharacters[i]);
           }
         }
       }
@@ -177,6 +177,19 @@ function getLastUpdated(){
   var currentTime = currentHour + ":" + currentMinute + (date.getHours()<12 ? "am" : "pm");
   var lastUpdated =  "Last Updated: " + todaysDate + " at " + currentTime + " PST";
   return lastUpdated;
+}
+
+function isValidCharacter(character){
+  if(character.getName() === undefined || 
+    character.getRealm() === undefined || 
+    character.getLevel() === undefined ||
+    character.getRace() === undefined ||
+    character.getClass() === undefined){
+    return false;
+  }
+  else {
+    return true;
+  }
 }
 
 /*

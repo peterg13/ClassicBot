@@ -47,10 +47,12 @@ class Blizzard {
     callAPICharacter(character, callback){
         this.getToken().then(accessToken => {
             request('https://us.api.blizzard.com/wow/character/' + character.getRealm() + '/' + character.getName() + '?locale=en_US&access_token=' + accessToken, { json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
-            else{
-            callback(body);}
-            });}); 
+                if (err) { return console.log(err); }
+                else{
+                    callback(body);
+                }
+            });
+        }); 
         
     };  
 
@@ -63,6 +65,7 @@ class Blizzard {
                     character.setRace(body.race);
                     character.setClass(body.class);
                     resolve(character);
+                    
                 })
             } catch(e){
                 reject(e);
