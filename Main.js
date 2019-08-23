@@ -35,6 +35,11 @@ client.on('message', message => {
       case "!race":
         printLocalDatabase(message);
         break;
+
+      //prints the help message
+      case "!help":
+        helpMessage(message);
+        break;
     }
 });
 
@@ -80,6 +85,14 @@ function generateDiscordFriendlyDatabaseString(characterArray, lastUpdated){
   completedString = completedString + "```\n"
   return completedString + "*" + lastUpdated + "*";
 };
+
+//prints the help message
+function helpMessage(message){
+  var helpMessage = "__**ClassicBot Commands**__\n";
+  helpMessage = helpMessage + "!add name realm (adds a character to be tracked in the race)\n";
+  helpMessage = helpMessage + "!race (prints the current stats for the race)\n";
+  message.channel.send(helpMessage);
+}
 
 //logs the client in
 client.login(discordAuth.token);
