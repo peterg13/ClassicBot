@@ -21,14 +21,7 @@ admin.initializeApp({
 //reference to out Firebase Database
 let db = admin.firestore();
 
-
-//get new character- done
-//pull database - done
-//combine - done
-//call blizzard api for each character
-//check for updates
-//if so then update the database
-//write to file for discord bot
+//TODO make this section loop so the server is always running
 getNewCharacters().then(newCharacters => {
   //console.log(newCharacters);
   pullDatabase().then(database =>{
@@ -73,28 +66,34 @@ getNewCharacters().then(newCharacters => {
 function getNewCharacters(){
   var newCharactersFile = JSON.parse(fs.readFileSync("./charactersToAdd.json"));
   var newCharacters = newCharactersFile.newCharacters;
+  //tempCharacterArray contains all of our new characters.  They are basic characters with only name and realm.  The rest of the fields are undefined at this time.
   var tempCharacterArray = newCharacters.map(character => {
     return new Character(character.name, character.realm);
   });
+  //promiseArray contains all of our new characters info after calling Blizzard API
   var promiseArray = tempCharacterArray.map(tempCharacter => {
     return armory.requestCharacter(tempCharacter);
   });
   //clears the file of characters waiting to be added
   fs.writeFileSync("./charactersToAdd.json", JSON.stringify({"newCharacters": []}, null, 2));
+  //returns the array of our characters
   return Promise.all(promiseArray);
   
 };
 
+//grabs the Firebase data in a snapshot for what is currerntly there and returns it as an array of Character classes
 function pullDatabase(){
   return new Promise((resolve, reject) => {
     try{
       db.collection("Classic").get().then((snapshot) => {
+        //characterArray will become filled with the documents from our Firebase database converted into Character classes
         var characterArray = [];
         snapshot.forEach((doc) => {
           //console.log(doc.id, '=>', doc.data());
           var character = doc.data();
           characterArray.push(new Character(character.name, character.realm, character.level, character.race, character.class));
         });
+        //returns the array of Character classes
         resolve(characterArray);
       })
       .catch((err) => {
@@ -106,7 +105,9 @@ function pullDatabase(){
   }) 
 };
 
+//simple loop method to check if the given character already exists in the given array
 function doesCharacterExist(checkCharacter, characterArray){
+  //first checks if the character is even valid
   if(isValidCharacter(checkCharacter)){
     for(let i = 0; i < characterArray.length; i++){
       var characterInArray = characterArray[i];
@@ -119,6 +120,8 @@ function doesCharacterExist(checkCharacter, characterArray){
   return false;
 };
 
+//takes all of the characters from the given database and pulls a new armory request for the character.  Then compares the new armory request with the database character.  If there is an update
+//it will push the new update onto the local and Firbase database
 function updateCharacters(database){ 
   //gets the latest armory update for all characters in the online database and saves it in new array
   var updatedCharactersPromises = database.map(dbCharacter => {
@@ -151,7 +154,9 @@ function updateCharacters(database){
   });
 };
 
+//takes in a character, converts it into a Document with its reepctive fields and adds it to the online Firebase database
 function writeCharacterToFirebase(character){
+  //docRef is a pointer to where the new entry will go
   let docRef = db.collection('/Classic').doc(character.getName());
   docRef.set(
     {
@@ -161,18 +166,20 @@ function writeCharacterToFirebase(character){
       race: character.getRace(),
       class: character.getClass()
     }
-
   ).then(function () {return Promise.resolve()});
 }
 
+//simple function to write the given database to a JSON file for quick access locally
 function writeDatabaseToFile(database){
   var lastUpdated = getLastUpdated();
   fs.writeFileSync("./local_database.json", JSON.stringify({"Characters": database, "LastUpdated": lastUpdated}, null, 2));
 }
 
+//gets a human readable strirng for the current Date/Time
 function getLastUpdated(){
   var date = new Date();
   var todaysDate = (date.getMonth()+1) + "/" + date.getDate() + "/" + date.getFullYear();
+  //the current hour section turns a 24 hour time into a 12 hour time and adds a 0 to the beginning if the time is below 10.  For exa
   var currentHour = "";
   if(date.getHours() > 12 || date.getHours() == 0){
     currentHour = Math.abs(date.getHours() - 12);
@@ -185,10 +192,12 @@ function getLastUpdated(){
   }
   var currentMinute = date.getMinutes() < 10 ? "0"+date.getMinutes() : date.getMinutes();
   var currentTime = currentHour + ":" + currentMinute + (date.getHours()<12 ? "am" : "pm");
+  //puts it all together in a nice readable string
   var lastUpdated =  "Last Updated: " + todaysDate + " at " + currentTime + " PST";
   return lastUpdated;
 }
 
+//checks if the character is valid.  If any of the fields are undefined the character will not be valid and return false
 function isValidCharacter(character){
   if(character.getName() === undefined || 
     character.getRealm() === undefined || 
