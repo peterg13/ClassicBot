@@ -29,6 +29,7 @@ getNewCharacters().then(newCharacters => {
     newCharacters.forEach(newCharacter => {
       if(!doesCharacterExist(newCharacter, database) && isValidCharacter(newCharacter)){
         //adds the character to online database
+        console.log("Added [" + newCharacter.getName() + "-" + newCharacter.getRealm() + "] to the server");
         writeCharacterToFirebase(newCharacter);
         //adds character to our locally copied database for further evaluation
         addedCharacters.push(newCharacter);

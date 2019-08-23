@@ -11,15 +11,6 @@ const fs = require('fs');
 const Discord = require('discord.js');
 //Discord user client used to run commands
 const client = new Discord.Client();
-//import for my own Blizzard API
-//var Blizzard = require('./blizzardAPI.js');
-//Reference to our Blizzard API to request from Blizzard
-//var armory = new Blizzard(blizzardAuth.ID, blizzardAuth.Secret);
-
-
-//console.log(armory.requestCharacter());
-
-
 
 //logs that the bot is logged in
 client.on('ready', () => {
@@ -28,19 +19,26 @@ client.on('ready', () => {
     client.channels.get('415954951630618633').send('Classic Bot Online!');
 });
 
-  //what happens when a message is received
+//what happens when a message is received
 client.on('message', message => {
     var splitMessage = message.content.split(" ");
-    if (splitMessage[0] === "add"){
-      addCharacter(splitMessage[1], splitMessage[2]);
+    switch(splitMessage[0]){
+      //calls the function which will add a character to our database
+      case "!add":
+        if(splitMessage.length === 3){
+          addCharacter(splitMessage[1], splitMessage[2]);
+        }
+        break;
     }
-  });
+});
 
+//adds a character to the specified file which will be picked up by our server
 function addCharacter(characterName, characterRealm){
   var jsonCharactersToAdd = JSON.parse(fs.readFileSync("./charactersToAdd.json"));
   jsonCharactersToAdd["newCharacters"].push({"name": characterName, "realm": characterRealm});
   //prints a message to the console
   addCharacterConsoleMessage(jsonCharactersToAdd);
+  //writes the file
   fs.writeFileSync("./charactersToAdd.json", JSON.stringify(jsonCharactersToAdd, null, 2)); 
 };
 
