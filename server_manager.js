@@ -21,37 +21,41 @@ admin.initializeApp({
 //reference to out Firebase Database
 let db = admin.firestore();
 
-//TODO make this section loop so the server is always running
-getNewCharacters().then(newCharacters => {
-  //console.log(newCharacters);
-  pullDatabase().then(database =>{
-    var addedCharacters = [];
-    newCharacters.forEach(newCharacter => {
-      if(!doesCharacterExist(newCharacter, database) && isValidCharacter(newCharacter)){
-        //adds the character to online database
-        console.log("Added [" + newCharacter.getName() + "-" + newCharacter.getRealm() + "] to the server");
-        writeCharacterToFirebase(newCharacter);
-        //adds character to our locally copied database for further evaluation
-        addedCharacters.push(newCharacter);
-      }
-    })
-    
-    updateCharacters(database).then(promises => {
+//causes the below code to be ran based on the interval set at the bottom
+setInterval(function() {
+  console.log("Updating...");
+  getNewCharacters().then(newCharacters => {
+    //console.log(newCharacters);
+    pullDatabase().then(database =>{
+      var addedCharacters = [];
+      newCharacters.forEach(newCharacter => {
+        if(!doesCharacterExist(newCharacter, database) && isValidCharacter(newCharacter)){
+          //adds the character to online database
+          console.log("Added [" + newCharacter.getName() + "-" + newCharacter.getRealm() + "] to the server");
+          writeCharacterToFirebase(newCharacter);
+          //adds character to our locally copied database for further evaluation
+          addedCharacters.push(newCharacter);
+        }
+      })
+      
+      updateCharacters(database).then(promises => {
+        addedCharacters.forEach(addedCharacter =>{
+          database.push(addedCharacter);
+        });
+        //database now contains all the characters new and old
+        writeDatabaseToFile(database);
+        //console.log(database);
+      });
+      //database now contains all the characters new and old
       addedCharacters.forEach(addedCharacter =>{
         database.push(addedCharacter);
       });
-      //database now contains all the characters new and old
       writeDatabaseToFile(database);
       //console.log(database);
+      console.log("Finished Updating: " + (new Date()));
     });
-    //database now contains all the characters new and old
-    addedCharacters.forEach(addedCharacter =>{
-      database.push(addedCharacter);
-    });
-    writeDatabaseToFile(database);
-    //console.log(database);
   });
-});
+}, (60000*5));//60000 is one minute
 
 
 
@@ -143,10 +147,9 @@ function updateCharacters(database){
             //now we have to check if the level is different (no race changes exist in classic)
             if(updatedCharacters[i].getLevel() != database[j].getLevel()){
               //overwrites the database entry for that character
-              console.log("Updated " + updatedCharacters[i].getName() + " level from " + database[j].getLevel() + " to " + updatedCharacters[i].getLevel());
+              printCharacterUpdateToConsole(updatedCharacters[i], database[j].getLevel());
               database[j] = updatedCharacters[i];
               writeCharacterToFirebase(updatedCharacters[i]);
-              
             }
           }
         }
@@ -212,6 +215,15 @@ function isValidCharacter(character){
     return true;
   }
 }
+
+//makes a human readable print to the console when a character is updated
+function printCharacterUpdateToConsole(character, oldLevel){
+  console.log("-----------------------------------------------");
+  console.log("------------        UPDATED        ------------");
+  console.log("-----------------------------------------------");
+  console.log(character.getName() + " leveled up from " + oldLevel + " to " + character.getLevel());
+  console.log("-----------------------------------------------");
+};
 
 /*
 var tankadinn = new Character("Tankadinn", "Darkspear", 120, 30, 2);
