@@ -21,7 +21,7 @@ const localDatabaseNoAPIPath = "./local_database_no_api.json";
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
     //announces on Discord that the bot is online
-    client.channels.get('415954951630618633').send('Classic Bot Online!');
+    client.channels.find(channel => channel.name === "general-chat").send('Classic Bot Online!');
 });
 
 //what happens when a message is received
@@ -123,6 +123,9 @@ function helpMessage(message){
   //non api version
   helpMessage = helpMessage + "'!add <CharacterName>' (adds a character to be tracked in the race)\n";
   helpMessage = helpMessage + "'!race' (prints the current stats for the race)\n";
+  helpMessage = helpMessage + "'!ding' <CharacterName> (levels up a character by 1)\n";
+  helpMessage = helpMessage + "'!ding' <CharacterName> <CurrentLevel> (sets the character to the given level)\n";
+  helpMessage = helpMessage + "'!help' (???????????????????)";
   message.channel.send(helpMessage);
 }
 
