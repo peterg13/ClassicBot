@@ -13,6 +13,10 @@ const Discord = require('discord.js');
 //Discord user client used to run commands
 const client = new Discord.Client();
 
+//our local databases
+const localDatabasePath = "./local_database.json";
+const localDatabaseNoAPIPath = "./local_database_no_api.json";
+
 //logs that the bot is logged in
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -26,8 +30,17 @@ client.on('message', message => {
     switch(splitMessage[0]){
       //calls the function which will add a character to our database
       case "!add":
-        if(splitMessage.length === 3){
+        //this is for when the API becomes available
+        /*if(splitMessage.length === 3){
           addCharacter(splitMessage[1], splitMessage[2]);
+        }*/
+
+        //this is the non-api version
+        if(splitMessage.length === 2){
+          addCharacterNoAPI(message, splitMessage[1]);
+        }
+        else{
+          message.reply("make sure to only type in '!add character_name'");
         }
         break;
 
@@ -64,7 +77,7 @@ function addCharacterConsoleMessage(newJSON){
 
 //prints a readable version of the local database
 function printLocalDatabase(message){
-  var database = JSON.parse(fs.readFileSync("./local_database.json"));
+  var database = JSON.parse(fs.readFileSync(localDatabasePath));
   var databaseCharacters = [];
   for(let i = 0; i < database.Characters.length; i++){
     databaseCharacters.push(new Character(database.Characters[i]._name, database.Characters[i]._realm, database.Characters[i]._level, database.Characters[i]._race, database.Characters[i]._class));
@@ -93,6 +106,45 @@ function helpMessage(message){
   helpMessage = helpMessage + "!race (prints the current stats for the race)\n";
   message.channel.send(helpMessage);
 }
+
+//Since there will be no API at launch we need a way to manually add and track characters
+//---------------------------------------------------------------------------------------
+//---------------        Functions used until the API is available        ---------------
+//---------------------------------------------------------------------------------------
+
+//adds a new character to our local database
+function addCharacterNoAPI(message, characterName){
+  var localDatabase = JSON.parse(fs.readFileSync(localDatabaseNoAPIPath));
+  if(!isInDatabaseNoAPI(characterName, localDatabase.Characters)){
+    localDatabase["Characters"].push({name: characterName, "level": 1});
+    //prints a message to the console
+    console.log("------------------------");
+    console.log("Added: " + characterName);
+    console.log("------------------------");
+    //writes the file
+    fs.writeFileSync(localDatabaseNoAPIPath, JSON.stringify(localDatabase, null, 2));
+  }
+  else{
+    message.reply(characterName + " is already being tracked");
+  }
+  
+};
+
+//checks if the character is already in our databse.
+function isInDatabaseNoAPI(name, databaseCharacters){
+  for(let i = 0; i < databaseCharacters.length; i++){
+    if(name.toLowerCase() === databaseCharacters[i].name.toLowerCase()){
+      return true;
+    }
+  }
+  return false;
+}
+
+
+
+
+
+//---------------------------------------------------------------------------------------
 
 //logs the client in
 client.login(discordAuth.token);
