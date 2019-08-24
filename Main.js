@@ -143,6 +143,7 @@ function addCharacterNoAPI(message, characterName){
     console.log("------------------------");
     console.log("Added: " + characterName);
     console.log("------------------------");
+    message.reply(characterName + " has been added");
     //writes the file
     fs.writeFileSync(localDatabaseNoAPIPath, JSON.stringify(localDatabase, null, 2));
   }
