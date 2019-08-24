@@ -215,7 +215,7 @@ function setCharacterLevel(message, characterName, newLevel){
     for(let i = 0; i < database.Characters.length; i++){
       if(characterName.toLowerCase() === database.Characters[i].name.toLowerCase()){
         //one final check just to make sure no one goes past 60
-        if(newLevel <= 60){
+        if(newLevel <= 60 && newLevel > 0){
           database.Characters[i].level = Number(newLevel);
           //writes the file
           fs.writeFileSync(localDatabaseNoAPIPath, JSON.stringify(database, null, 2));
