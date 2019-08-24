@@ -213,7 +213,7 @@ function setCharacterLevel(message, characterName, newLevel){
       if(characterName.toLowerCase() === database.Characters[i].name.toLowerCase()){
         //one final check just to make sure no one goes past 60
         if(newLevel <= 60){
-          database.Characters[i].level = newLevel;
+          database.Characters[i].level = Number(newLevel);
           //writes the file
           fs.writeFileSync(localDatabaseNoAPIPath, JSON.stringify(database, null, 2));
           message.channel.send("Gratz on hitting " + database.Characters[i].level + "!");

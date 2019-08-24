@@ -1,3 +1,28 @@
 {
-  "Characters": []
+  "Characters": [
+    {
+      "name": "Peter",
+      "level": 60
+    },
+    {
+      "name": "Kaol",
+      "level": 12
+    },
+    {
+      "name": "Brightside",
+      "level": 20
+    },
+    {
+      "name": "Destort",
+      "level": 5
+    },
+    {
+      "name": "Serawr",
+      "level": 13
+    },
+    {
+      "name": "Savageblow",
+      "level": 1
+    }
+  ]
 }
