@@ -40,13 +40,27 @@ client.on('message', message => {
           addCharacterNoAPI(message, splitMessage[1]);
         }
         else{
-          message.reply("make sure to only type in '!add character_name'");
+          message.reply("not a valid command. Type !help for a list of available commands");
         }
         break;
 
       //prints the local database into Discord
       case "!race":
         printLocalDatabase(message);
+        break;
+
+      //levels up a character in our database.  If no level entered it ups it by 1, otherwise it changes to the level entered
+      case "!ding":
+        //dings by 1
+        if(splitMessage.length === 2){
+          ding(message, splitMessage[1]);
+        }
+        else if(splitMessage.length === 3){
+          setCharacterLevel(message, splitMessage[1], splitMessage[2]);
+        }
+        else{
+          message.reply("not a valid command. Type !help for a list of available commands");
+        }
         break;
 
       //prints the help message
@@ -102,8 +116,13 @@ function generateDiscordFriendlyDatabaseString(characterArray, lastUpdated){
 //prints the help message
 function helpMessage(message){
   var helpMessage = "__**ClassicBot Commands**__\n";
-  helpMessage = helpMessage + "!add name realm (adds a character to be tracked in the race)\n";
-  helpMessage = helpMessage + "!race (prints the current stats for the race)\n";
+  //api version
+  //helpMessage = helpMessage + "!add name realm (adds a character to be tracked in the race)\n";
+  //helpMessage = helpMessage + "!race (prints the current stats for the race)\n";
+
+  //non api version
+  helpMessage = helpMessage + "'!add <CharacterName>' (adds a character to be tracked in the race)\n";
+  helpMessage = helpMessage + "'!race' (prints the current stats for the race)\n";
   message.channel.send(helpMessage);
 }
 
@@ -140,10 +159,79 @@ function isInDatabaseNoAPI(name, databaseCharacters){
   return false;
 }
 
+//prints a readable version of the local database with no API to Discord
+function printLocalDatabase(message){
+  var database = JSON.parse(fs.readFileSync(localDatabaseNoAPIPath));
+  
+  //lets sort the array in descending order based on level
+  database.Characters.sort(function(a, b){return b.level-a.level});
+  var databaseString = generateDiscordFriendlyDatabaseStringNoAPI(database.Characters);
+  message.channel.send(databaseString);
+};
 
+//function to get a string that displays the current race in an easy to read form NO API
+function generateDiscordFriendlyDatabaseStringNoAPI(characterArray){
+  var completedString = "__**RACE TO 60 CURRENT STANDINGS:**__\n```";
+  for(let i = 0; i < characterArray.length; i++){
+    completedString = completedString + (i+1) + ". (" + characterArray[i].level + ") " + characterArray[i].name + "\n";
+  }
+  completedString = completedString + "```\n"
+  return completedString;
+};
 
+//levels the given character by 1
+function ding(message, characterName){
+  var database = JSON.parse(fs.readFileSync(localDatabaseNoAPIPath));
+  //checks if character exists
+  if(isInDatabaseNoAPI(characterName, database.Characters)){
+    //if so find it and update its level by 1
+    for(let i = 0; i < database.Characters.length; i++){
+      if(characterName.toLowerCase() === database.Characters[i].name.toLowerCase()){
+        //one final check just to make sure no one goes past 60
+        if(database.Characters[i].level != 60){
+          database.Characters[i].level++;
+          //writes the file
+          fs.writeFileSync(localDatabaseNoAPIPath, JSON.stringify(database, null, 2));
+          message.channel.send("Gratz on hitting " + database.Characters[i].level + "!");
+        }
+        break;
+      }
+    }
+  }
+  else{
+    message.reply("Cannot find: " + characterName + "\n" + "Make sure to add it to the race.");
+  }
+}
 
+//sets the character level to given level
+function setCharacterLevel(message, characterName, newLevel){
+  var database = JSON.parse(fs.readFileSync(localDatabaseNoAPIPath));
+  //checks if character exists
+  if(isInDatabaseNoAPI(characterName, database.Characters)){
+    //if so find it and update its level to the new level
+    for(let i = 0; i < database.Characters.length; i++){
+      if(characterName.toLowerCase() === database.Characters[i].name.toLowerCase()){
+        //one final check just to make sure no one goes past 60
+        if(newLevel <= 60){
+          database.Characters[i].level = newLevel;
+          //writes the file
+          fs.writeFileSync(localDatabaseNoAPIPath, JSON.stringify(database, null, 2));
+          message.channel.send("Gratz on hitting " + database.Characters[i].level + "!");
+        }
+        else{
+          message.channel.send("Nice try funny guy");
+        }
+        break;
+      }
+    }
+  }
+  else{
+    message.reply("Cannot find: " + characterName + "\n" + "Make sure to add it to the race.");
+  }
+}
 
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
 
 //logs the client in
