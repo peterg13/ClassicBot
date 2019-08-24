@@ -21,7 +21,7 @@ const localDatabaseNoAPIPath = "./local_database_no_api.json";
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
     //announces on Discord that the bot is online
-    client.channels.find(channel => channel.name === "general-chat").send('Classic Bot Online!');
+    //client.channels.find(channel => channel.name === "general-chat").send('Classic Bot Online!');
 });
 
 //what happens when a message is received
