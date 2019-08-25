@@ -6,6 +6,8 @@ var discordAuth = require("./discordAuth.json");
 //my character class
 let Character = require('./character.js');
 
+const cheerio = require('cheerio');
+const request = require('request');
 const fs = require('fs');
 
 //necessary import needed for DiscordAPI
@@ -61,6 +63,11 @@ client.on('message', message => {
         else{
           message.reply("not a valid command. Type !help for a list of available commands");
         }
+        break;
+
+      //realm info
+      case "!realm":
+        highmane(message);
         break;
 
       //prints the help message
@@ -234,9 +241,24 @@ function setCharacterLevel(message, characterName, newLevel){
   }
 }
 
+
+
+
+
 //---------------------------------------------------------------------------------------
+//---------------                 Normal Discord Commands                 ---------------
 //---------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------
+
+//special function for when people want some realm "info"
+function highmane(message){
+  var url = 'https://www.deviantart.com/tag/sallywhitemane';
+  request(url, function(error, response, html){
+    const $ = cheerio.load(html);
+    console.log(html);
+  })
+};
+
+
 
 //logs the client in
 client.login(discordAuth.token);
