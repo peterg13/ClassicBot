@@ -6,8 +6,6 @@ var discordAuth = require("./discordAuth.json");
 //my character class
 let Character = require('./character.js');
 
-const cheerio = require('cheerio');
-const request = require('request');
 const fs = require('fs');
 
 //necessary import needed for DiscordAPI
@@ -67,6 +65,7 @@ client.on('message', message => {
 
       //realm info
       case "!realm":
+      case "!thigh":
         highmane(message);
         break;
 
@@ -128,11 +127,12 @@ function helpMessage(message){
   //helpMessage = helpMessage + "!race (prints the current stats for the race)\n";
 
   //non api version
-  helpMessage = helpMessage + "'!add <CharacterName>' (adds a character to be tracked in the race)\n";
-  helpMessage = helpMessage + "'!race' (prints the current stats for the race)\n";
-  helpMessage = helpMessage + "'!ding' <CharacterName> (levels up a character by 1)\n";
-  helpMessage = helpMessage + "'!ding' <CharacterName> <CurrentLevel> (sets the character to the given level)\n";
-  helpMessage = helpMessage + "'!help' (???????????????????)";
+  helpMessage = helpMessage + "**!add <CharacterName>**\n-`adds a character to be tracked in the race`\n";
+  helpMessage = helpMessage + "**!race**\n-`prints the current stats for the race`\n";
+  helpMessage = helpMessage + "**!ding <CharacterName>**\n-`levels up a character by 1`\n";
+  helpMessage = helpMessage + "**!ding <CharacterName> <CurrentLevel>**\n-`sets the character to the given level`\n";
+  helpMessage = helpMessage + "**!realm**\n-`provides some realm info`\n";
+  helpMessage = helpMessage + "**!thigh**\n-`;)`";
   message.channel.send(helpMessage);
 }
 
@@ -251,11 +251,14 @@ function setCharacterLevel(message, characterName, newLevel){
 
 //special function for when people want some realm "info"
 function highmane(message){
-  var url = 'https://www.deviantart.com/tag/sallywhitemane';
-  request(url, function(error, response, html){
-    const $ = cheerio.load(html);
-    console.log(html);
-  })
+  //gets a list of all the files in the whitemane folder
+  var files = fs.readdirSync('./whitemane');
+  //picks a random number between 0 - files.length
+  var randNum = Math.floor(Math.random() * (files.length));
+  message.channel.send("The Queen: Thighmane", {
+    files: ["./whitemane/" + files[randNum]]
+  });
+
 };
 
 
