@@ -134,10 +134,10 @@ function helpMessage(message){
   //non api version
   helpMessage = helpMessage + "**!add <CharacterName>**\n-`adds a character to be tracked in the race`\n";
   helpMessage = helpMessage + "**!race**\n-`prints the current stats for the race`\n";
+  helpMessage = helpMessage + "**!ding**\n-`if you have only one character it levels it up by 1`\n";
   helpMessage = helpMessage + "**!ding <CharacterName>**\n-`levels up a character by 1`\n";
   helpMessage = helpMessage + "**!ding <CharacterName> <CurrentLevel>**\n-`sets the character to the given level`\n";
   helpMessage = helpMessage + "**!realm**\n-`provides some realm info`\n";
-  helpMessage = helpMessage + "**!thigh**\n-`;)`";
   message.channel.send(helpMessage);
 }
 
@@ -216,6 +216,7 @@ function ding(message){
       //writes the file
       fs.writeFileSync(localDatabaseNoAPIPath, JSON.stringify(database, null, 2));
       message.channel.send("Gratz " + database.Characters[characterIndexs[0]].name + " on hitting " + database.Characters[characterIndexs[0]].level + "!");
+      console.log(database.Characters[characterIndexs[0]].name + " just leveled to " + database.Characters[characterIndexs[0]].level);
     }
   }
 }
@@ -236,6 +237,7 @@ function dingName(message, characterName){
             //writes the file
             fs.writeFileSync(localDatabaseNoAPIPath, JSON.stringify(database, null, 2));
             message.channel.send("Gratz on hitting " + database.Characters[i].level + "!");
+            console.log(database.Characters[i].name + " just leveled to " + database.Characters[i].level);
           }
         }
         else{
@@ -266,6 +268,7 @@ function setCharacterLevel(message, characterName, newLevel){
             //writes the file
             fs.writeFileSync(localDatabaseNoAPIPath, JSON.stringify(database, null, 2));
             message.channel.send("Gratz on hitting " + database.Characters[i].level + "!");
+            console.log(database.Characters[i].name + " just leveled to " + database.Characters[i].level);
           }
           else{
             message.channel.send("Nice try funny guy");
