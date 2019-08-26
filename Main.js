@@ -51,10 +51,15 @@ client.on('message', message => {
 
       //levels up a character in our database.  If no level entered it ups it by 1, otherwise it changes to the level entered
       case "!ding":
-        //dings by 1
-        if(splitMessage.length === 2){
-          ding(message, splitMessage[1]);
+        //dings the authors character if they only have one in the DB
+        if(splitMessage.length === 1){
+          ding(message);
         }
+        //dings given character by 1
+        else if(splitMessage.length === 2){
+          dingName(message, splitMessage[1]);
+        }
+        //sets character to level
         else if(splitMessage.length === 3){
           setCharacterLevel(message, splitMessage[1], splitMessage[2]);
         }
@@ -141,11 +146,11 @@ function helpMessage(message){
 //---------------        Functions used until the API is available        ---------------
 //---------------------------------------------------------------------------------------
 
-//adds a new character to our local database
+//adds a new character to our local database.  The character includes name, level, and author (the user who added the character)
 function addCharacterNoAPI(message, characterName){
   var localDatabase = JSON.parse(fs.readFileSync(localDatabaseNoAPIPath));
   if(!isInDatabaseNoAPI(characterName, localDatabase.Characters)){
-    localDatabase["Characters"].push({name: characterName, "level": 1});
+    localDatabase["Characters"].push({name: characterName, "level": 1, "author":message.author.toString()});
     //prints a message to the console
     console.log("------------------------");
     console.log("Added: " + characterName);
@@ -190,20 +195,51 @@ function generateDiscordFriendlyDatabaseStringNoAPI(characterArray){
   return completedString;
 };
 
+//finds all characters in the database given by the author.  if there is only one it will level it up by 1
+function ding(message){
+  var database = JSON.parse(fs.readFileSync(localDatabaseNoAPIPath));
+  var characterIndexs = [];
+  for(let i = 0; i < database.Characters.length; i++){
+    if(database.Characters[i].author === message.author.toString()){
+      characterIndexs.push(i);
+    }
+  }
+  if(characterIndexs.length === 0){
+    message.reply("Sorry, I was not able to find any of your characters");
+  }
+  else if(characterIndexs.length > 1){
+    message.reply("Looks like you have more than one character. Please specify the character that has leveled up");
+  }
+  else{
+    if(database.Characters[characterIndexs[0]].level != 60){
+      database.Characters[characterIndexs[0]].level++;
+      //writes the file
+      fs.writeFileSync(localDatabaseNoAPIPath, JSON.stringify(database, null, 2));
+      message.channel.send("Gratz " + database.Characters[characterIndexs[0]].name + " on hitting " + database.Characters[characterIndexs[0]].level + "!");
+    }
+  }
+}
+
 //levels the given character by 1
-function ding(message, characterName){
+function dingName(message, characterName){
   var database = JSON.parse(fs.readFileSync(localDatabaseNoAPIPath));
   //checks if character exists
   if(isInDatabaseNoAPI(characterName, database.Characters)){
-    //if so find it and update its level by 1
+    //if so find it and update its level by 1 if it is the same author
     for(let i = 0; i < database.Characters.length; i++){
       if(characterName.toLowerCase() === database.Characters[i].name.toLowerCase()){
-        //one final check just to make sure no one goes past 60
-        if(database.Characters[i].level != 60){
-          database.Characters[i].level++;
-          //writes the file
-          fs.writeFileSync(localDatabaseNoAPIPath, JSON.stringify(database, null, 2));
-          message.channel.send("Gratz on hitting " + database.Characters[i].level + "!");
+        //checks to make sure it is the same author
+        if(database.Characters[i].author === message.author.toString()){
+          //one final check just to make sure no one goes past 60
+          if(database.Characters[i].level != 60){
+            database.Characters[i].level++;
+            //writes the file
+            fs.writeFileSync(localDatabaseNoAPIPath, JSON.stringify(database, null, 2));
+            message.channel.send("Gratz on hitting " + database.Characters[i].level + "!");
+          }
+        }
+        else{
+          message.reply("Hey that is NOT your character!");
         }
         break;
       }
@@ -222,15 +258,21 @@ function setCharacterLevel(message, characterName, newLevel){
     //if so find it and update its level to the new level
     for(let i = 0; i < database.Characters.length; i++){
       if(characterName.toLowerCase() === database.Characters[i].name.toLowerCase()){
-        //one final check just to make sure no one goes past 60
-        if(newLevel <= 60 && newLevel > 0){
-          database.Characters[i].level = Number(newLevel);
-          //writes the file
-          fs.writeFileSync(localDatabaseNoAPIPath, JSON.stringify(database, null, 2));
-          message.channel.send("Gratz on hitting " + database.Characters[i].level + "!");
+        //checks to make sure it is the same author
+        if(database.Characters[i].author === message.author.toString()){
+          //one final check just to make sure no one goes past 60
+          if(newLevel <= 60 && newLevel > 0){
+            database.Characters[i].level = Number(newLevel);
+            //writes the file
+            fs.writeFileSync(localDatabaseNoAPIPath, JSON.stringify(database, null, 2));
+            message.channel.send("Gratz on hitting " + database.Characters[i].level + "!");
+          }
+          else{
+            message.channel.send("Nice try funny guy");
+          }
         }
         else{
-          message.channel.send("Nice try funny guy");
+          message.reply("Hey that is NOT your character!");
         }
         break;
       }
