@@ -188,9 +188,29 @@ function printLocalDatabase(message){
 //function to get a string that displays the current race in an easy to read form NO API
 function generateDiscordFriendlyDatabaseStringNoAPI(characterArray){
   var completedString = "__**RACE TO 60 CURRENT STANDINGS:**__\n```";
+  const numberOfCharacters_index = 3; // maximum number of characters that index has (999)
+  const numberOfCharacters_level = 2; // maximum number of characters that level has (60)
+  const numberOfCharacters_name = characterArray.reduce((a,b) => a.name.length > b.name.length ? a : b); //finds the longest named character
+  const tableTop =  `╔${'═'*numberOfCharacters_index}╦${'═'*numberOfCharacters_level}╦${'═'*numberOfCharacters_name}╗` //top of table
+  const tableBottom = `╚${'═'*numberOfCharacters_index}╩${'═'*numberOfCharacters_level}╩${'═'*numberOfCharacters_name}╝` //bottom of table
+
+  // add top of the table
+  completedString += tableTop + "\n"
+
+  // add table body
   for(let i = 0; i < characterArray.length; i++){
-    completedString = completedString + (i+1) + ". (" + characterArray[i].level + ") " + characterArray[i].name + "\n";
+    const level  = characterArray[i].level;
+    const name = characterArray[i].name;
+    const indexStr = `${i}${' '*(numberOfCharacters_index - i.toString().length)}` //index plus the number of spaces needed to fill the column (ex. '1  ')
+    const levelStr = `${level}${' '*(numberOfCharacters_level - level.toString().length)}` //level plus the number of spaces needed to fill the column (ex. '5 ')
+    const nameStr = `${name}${' '*(numberOfCharacters_name - name.length)}` //name plus the number of spaces needed to fill the column (ex. 'Peter     ')
+    const row = `╠${indexStr}╬${levelStr}╬${nameStr}╣` //formatted row
+    completedString += row + "\n";
+    // completedString = completedString + (i+1) + ". (" + characterArray[i].level + ") " + characterArray[i].name + "\n";
   }
+
+  // add table bottom
+  completedString += tableBottom + "\n"
   completedString = completedString + "```\n"
   return completedString;
 };
